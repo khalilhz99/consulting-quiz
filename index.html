@@ -238,12 +238,21 @@ document.getElementById('lang-switch').onclick = () => {
   document.documentElement.dir = dir;
   document.documentElement.lang = dir === 'rtl' ? 'ar' : 'en';
   document.getElementById('lang-switch').textContent = dir === 'rtl' ? 'English' : 'العربية';
+
+  // 🛡️ لو النتيجة ظهرت، فقط أعد ترجمتها بدون إعادة تشغيل الكويز
+  if (resultDiv.style.display === 'block') {
+    showResult();
+    return;
+  }
+
+  // ✅ لو ما خلصش الكويز، ابدأ من الأول
   currentQuestion = 0;
   answers = {};
   resultDiv.style.display = 'none';
   form.style.display = 'block';
   renderQuestion(currentQuestion);
 };
+
 
 renderQuestion(currentQuestion);
 </script>
