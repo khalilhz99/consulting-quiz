@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Consulting Service Self-Assessment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background-color: #f5f7fa;
+      color: #2c3e50;
+      max-width: 800px;
+      margin: auto;
+      padding: 30px;
+    }
+
+    #quiz-container {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .question {
+      display: none;
+      margin-bottom: 30px;
+    }
+
+    .question.active {
+      display: block;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0;
+      cursor: pointer;
+    }
+
+    button {
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #result {
+      display: none;
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #e8f0fe;
+      border-left: 6px solid #1a73e8;
+      border-radius: 4px;
+    }
+
+    #lang-switch {
+      float: right;
+      margin-bottom: 10px;
+      background: transparent;
+      color: #2c3e50;
+      border: 1px solid #2c3e50;
+    }
+
+    [dir="rtl"] {
+      direction: rtl;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+<div id="quiz-container">
+  <button id="lang-switch">العربية</button>
+  <h1 data-en="Which Consulting Service Does Your Business Need?" data-ar="ما الخدمة الاستشارية التي تحتاجها شركتك؟">Which Consulting Service Does Your Business Need?</h1>
+  <form id="quizForm"></form>
+  <div id="result"></div>
+</div>
+
+<script>
+const quizData = [
+  {
+    name: "q1",
+    en: "What is the biggest challenge your business is currently facing?",
+    ar: "ما هو التحدي الأكبر الذي تواجهه شركتك حاليًا؟",
+    options: [
+      { en: "The market is changing fast", ar: "السوق يتغير بسرعة", value: 2 },
+      { en: "Weak results", ar: "النتائج ضعيفة", value: 4 },
+      { en: "Internal issues", ar: "مشاكل داخلية", value: 3 },
+      { en: "Risk concerns", ar: "القلق من المخاطر", value: 5 },
+      { en: "Not sure", ar: "غير متأكد", value: 1 }
+    ]
+  },
+  {
+    name: "q2",
+    en: "Do you have a current and documented business plan?",
+    ar: "هل لديك خطة عمل موثقة وحديثة؟",
+    options: [
+      { en: "Yes", ar: "نعم", value: 0 },
+      { en: "No", ar: "لا", value: 3 },
+      { en: "Partially", ar: "جزئياً", value: 2 }
+    ]
+  },
+  {
+    name: "q3",
+    en: "Do you know your company’s strengths and weaknesses?",
+    ar: "هل تعرف نقاط القوة والضعف في شركتك؟",
+    options: [
+      { en: "Yes", ar: "نعم", value: 0 },
+      { en: "No", ar: "لا", value: 3 },
+      { en: "Somewhat", ar: "إلى حد ما", value: 1 }
+    ]
+  },
+  {
+    name: "q4",
+    en: "Do you review team performance regularly?",
+    ar: "هل تقوم بمراجعة أداء الفريق بشكل منتظم؟",
+    options: [
+      { en: "Yes", ar: "نعم", value: 0 },
+      { en: "No", ar: "لا", value: 3 }
+    ]
+  },
+  {
+    name: "q5",
+    en: "How do you respond to market changes?",
+    ar: "كيف تتعامل مع تغيرات السوق؟",
+    options: [
+      { en: "Strong readiness", ar: "استعداد قوي", value: 0 },
+      { en: "Struggle", ar: "صعوبة في التأقلم", value: 4 },
+      { en: "Reactive", ar: "تأقلم رد فعل فقط", value: 2 }
+    ]
+  },
+  {
+    name: "q6",
+    en: "How clear is your direction?",
+    ar: "ما مدى وضوح التوجه الاستراتيجي لشركتك؟",
+    options: [
+      { en: "Very clear", ar: "واضح جدًا", value: 0 },
+      { en: "Unclear", ar: "غير واضح", value: 3 },
+      { en: "Somewhat clear", ar: "واضح جزئيًا", value: 1 }
+    ]
+  },
+  {
+    name: "q7",
+    en: "Crisis management?",
+    ar: "هل تعاملت مع أزمة مؤخراً؟",
+    options: [
+      { en: "Yes, with plan", ar: "نعم، بخطة", value: 1 },
+      { en: "Yes, no plan", ar: "نعم، بدون خطة", value: 4 },
+      { en: "No, but worried", ar: "لا، ولكن قلق", value: 3 }
+    ]
+  }
+];
+
+const form = document.getElementById('quizForm');
+const resultDiv = document.getElementById('result');
+let currentQuestion = 0;
+let answers = {};
+let quizCompleted = false;
+
+function renderQuestion(index) {
+  form.innerHTML = '';
+  const q = quizData[index];
+  const container = document.createElement('div');
+  container.className = 'question active';
+
+  const title = document.createElement('h2');
+  title.textContent = document.documentElement.dir === 'rtl' ? q.ar : q.en;
+  container.appendChild(title);
+
+  q.options.forEach((opt, i) => {
+    const label = document.createElement('label');
+    const input = document.createElement('input');
+    input.type = "radio";
+    input.name = q.name;
+    input.value = opt.value;
+    label.appendChild(input);
+    label.append(" " + (document.documentElement.dir === 'rtl' ? opt.ar : opt.en));
+    container.appendChild(label);
+  });
+
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = document.documentElement.dir === 'rtl' ? 'التالي' : 'Next';
+  nextBtn.onclick = () => {
+    const selected = container.querySelector(`input[name="${q.name}"]:checked`);
+    if (!selected) {
+      alert(document.documentElement.dir === 'rtl' ? 'يرجى اختيار إجابة' : 'Please select an answer');
+      return;
+    }
+    answers[q.name] = parseInt(selected.value);
+    currentQuestion++;
+    if (currentQuestion < quizData.length) {
+      renderQuestion(currentQuestion);
+    } else {
+      showResult();
+    }
+  };
+
+  container.appendChild(nextBtn);
+  form.appendChild(container);
+}
+
+function showResult() {
+  form.style.display = 'none';
+  const total = Object.values(answers).reduce((a, b) => a + b, 0);
+  let res = '';
+
+  if (total <= 9) {
+    res = document.documentElement.dir === 'rtl'
+      ? "<h2>التحليل الوضعي</h2><p>أنت بحاجة إلى فهم أعمق لموقع شركتك الحالي.</p>"
+      : "<h2>Situational Analysis</h2><p>You need a clearer picture of your business situation.</p>";
+  } else if (total <= 15) {
+    res = document.documentElement.dir === 'rtl'
+      ? "<h2>تدقيق الأعمال</h2><p>نوصي بإجراء تدقيق استراتيجي لتحديد مكامن الخلل.</p>"
+      : "<h2>Strategic Business Audit</h2><p>You need an internal audit to identify inefficiencies.</p>";
+  } else if (total <= 21) {
+    res = document.documentElement.dir === 'rtl'
+      ? "<h2>تحليل PESTLE</h2><p>يوصى بتحليل العوامل الخارجية التي تؤثر على شركتك.</p>"
+      : "<h2>PESTLE Analysis</h2><p>External environmental factors need to be analyzed.</p>";
+  } else {
+    res = document.documentElement.dir === 'rtl'
+      ? "<h2>تقييم المخاطر</h2><p>يجب وضع خطة لمواجهة المخاطر المحتملة.</p>"
+      : "<h2>Risk Assessment</h2><p>You need to plan for potential threats and risks.</p>";
+  }
+
+  resultDiv.innerHTML = res;
+  resultDiv.style.display = 'block';
+  quizCompleted = true;
+  resultDiv.scrollIntoView({ behavior: "smooth" });
+}
+
+document.getElementById('lang-switch').onclick = () => {
+  const dir = document.documentElement.dir === 'ltr' ? 'rtl' : 'ltr';
+  document.documentElement.dir = dir;
+  document.documentElement.lang = dir === 'rtl' ? 'ar' : 'en';
+  document.getElementById('lang-switch').textContent = dir === 'rtl' ? 'English' : 'العربية';
+
+  if (quizCompleted) {
+    showResult();
+    return;
+  }
+
+  currentQuestion = 0;
+  answers = {};
+  resultDiv.style.display = 'none';
+  form.style.display = 'block';
+  renderQuestion(currentQuestion);
+};
+
+renderQuestion(currentQuestion);
+</script>
+</body>
+</html>
