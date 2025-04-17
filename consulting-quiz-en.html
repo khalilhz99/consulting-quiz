@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Consulting Service Self-Assessment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background-color: #f5f7fa;
+      color: #2c3e50;
+      max-width: 800px;
+      margin: auto;
+      padding: 30px;
+    }
+
+    #quiz-container {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .question {
+      display: none;
+      margin-bottom: 30px;
+    }
+
+    .question.active {
+      display: block;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0;
+      cursor: pointer;
+    }
+
+    button {
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #result {
+      display: none;
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #e8f0fe;
+      border-left: 6px solid #1a73e8;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="quiz-container">
+  <h1>Which Consulting Service Does Your Business Need?</h1>
+  <form id="quizForm"></form>
+  <div id="result"></div>
+</div>
+
+<script>
+const quizData = [
+  {
+    name: "q1",
+    question: "What is the biggest challenge your business is currently facing?",
+    options: [
+      { label: "The market is changing fast", value: 2 },
+      { label: "Weak results", value: 4 },
+      { label: "Internal issues", value: 3 },
+      { label: "Risk concerns", value: 5 },
+      { label: "Not sure", value: 1 }
+    ]
+  },
+  {
+    name: "q2",
+    question: "Do you have a current and documented business plan?",
+    options: [
+      { label: "Yes", value: 0 },
+      { label: "No", value: 3 },
+      { label: "Partially", value: 2 }
+    ]
+  },
+  {
+    name: "q3",
+    question: "Do you know your company’s strengths and weaknesses?",
+    options: [
+      { label: "Yes", value: 0 },
+      { label: "No", value: 3 },
+      { label: "Somewhat", value: 1 }
+    ]
+  },
+  {
+    name: "q4",
+    question: "Do you review team performance regularly?",
+    options: [
+      { label: "Yes", value: 0 },
+      { label: "No", value: 3 }
+    ]
+  },
+  {
+    name: "q5",
+    question: "How do you respond to market changes?",
+    options: [
+      { label: "Strong readiness", value: 0 },
+      { label: "Struggle", value: 4 },
+      { label: "Reactive", value: 2 }
+    ]
+  },
+  {
+    name: "q6",
+    question: "How clear is your direction?",
+    options: [
+      { label: "Very clear", value: 0 },
+      { label: "Unclear", value: 3 },
+      { label: "Somewhat clear", value: 1 }
+    ]
+  },
+  {
+    name: "q7",
+    question: "Crisis management?",
+    options: [
+      { label: "Yes, with plan", value: 1 },
+      { label: "Yes, no plan", value: 4 },
+      { label: "No, but worried", value: 3 }
+    ]
+  }
+];
+
+const form = document.getElementById('quizForm');
+const resultDiv = document.getElementById('result');
+let currentQuestion = 0;
+let answers = {};
+let quizCompleted = false;
+
+function renderQuestion(index) {
+  form.innerHTML = '';
+  const q = quizData[index];
+  const container = document.createElement('div');
+  container.className = 'question active';
+
+  const title = document.createElement('h2');
+  title.textContent = q.question;
+  container.appendChild(title);
+
+  q.options.forEach((opt) => {
+    const label = document.createElement('label');
+    const input = document.createElement('input');
+    input.type = "radio";
+    input.name = q.name;
+    input.value = opt.value;
+    label.appendChild(input);
+    label.append(" " + opt.label);
+    container.appendChild(label);
+  });
+
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = 'Next';
+  nextBtn.onclick = () => {
+    const selected = container.querySelector(`input[name="${q.name}"]:checked`);
+    if (!selected) {
+      alert('Please select an answer');
+      return;
+    }
+    answers[q.name] = parseInt(selected.value);
+    currentQuestion++;
+    if (currentQuestion < quizData.length) {
+      renderQuestion(currentQuestion);
+    } else {
+      showResult();
+    }
+  };
+
+  container.appendChild(nextBtn);
+  form.appendChild(container);
+}
+
+function showResult() {
+  form.style.display = 'none';
+  const total = Object.values(answers).reduce((a, b) => a + b, 0);
+  let res = '';
+
+  if (total <= 9) {
+    res = "<h2>Situational Analysis</h2><p>You need a clearer picture of your business situation.</p>";
+  } else if (total <= 15) {
+    res = "<h2>Strategic Business Audit</h2><p>You need an internal audit to identify inefficiencies.</p>";
+  } else if (total <= 21) {
+    res = "<h2>PESTLE Analysis</h2><p>External environmental factors need to be analyzed.</p>";
+  } else {
+    res = "<h2>Risk Assessment</h2><p>You need to plan for potential threats and risks.</p>";
+  }
+
+  resultDiv.innerHTML = res;
+  resultDiv.style.display = 'block';
+  quizCompleted = true;
+  resultDiv.scrollIntoView({ behavior: "smooth" });
+}
+
+renderQuestion(currentQuestion);
+</script>
+</body>
+</html>
