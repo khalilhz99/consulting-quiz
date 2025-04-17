@@ -191,11 +191,12 @@ function renderQuestion(index) {
     }
     answers[q.name] = parseInt(selected.value);
     currentQuestion++;
-    if (currentQuestion < quizData.length) {
-      renderQuestion(currentQuestion);
-    } else {
-      showResult();
-    }
+   if (currentQuestion >= quizData.length) {
+  showResult();
+} else {
+  renderQuestion(currentQuestion);
+}
+
   };
 
   container.appendChild(nextBtn);
